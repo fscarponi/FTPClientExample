@@ -19,7 +19,6 @@ fun main() {
 //    // for example config.setServerTimeZoneId("Pacific/Pitcairn")
 //    ftp.configure(config);
 
-
     runCatching {
         ftp.connect(server)
         if(ftp.login("demo","password")){
@@ -33,7 +32,8 @@ fun main() {
         }
 
     }.onSuccess {
-        println(""+ftp.listFiles("/pub/example").count()+" files trovati")
+        //file and dir lists
+        println("${ftp.listFiles("/pub/example").count()} files trovati")
         println(ftp.listFiles("/pub/example").map { it.name }.toList())
         println(ftp.listDirectories("/pub/").map { it.name }.toList())
 
