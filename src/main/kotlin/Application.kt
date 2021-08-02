@@ -40,7 +40,9 @@ fun main() {
         //upload
 //        ftp.appendFile("/pub/example/mime-explorer.png", File.createTempFile("mime-explorer","png").inputStream())
         //download
-        ftp.retrieveFile("/pub/example/mime-explorer.png", File.createTempFile("mime-explorer",".png").outputStream())
+        val file=File.createTempFile("mime-explorer",".png")
+        ftp.retrieveFile("/pub/example/mime-explorer.png", file.outputStream())
+        println("download result: file size-> ${file.totalSpace}")
         ftp.logout()
         ftp.disconnect()
     }.onFailure {
