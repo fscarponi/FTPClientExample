@@ -43,6 +43,8 @@ fun main() {
         val file=File.createTempFile("mime-explorer",".png")
         ftp.retrieveFile("/pub/example/mime-explorer.png", file.outputStream())
         println("download result: file size-> ${file.totalSpace}")
+
+        //other APi https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/ftp/FTPClient.html
         ftp.logout()
         ftp.disconnect()
     }.onFailure {
