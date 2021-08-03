@@ -54,6 +54,12 @@ fun main() {
             println("file> ${it.name} ultima modifica>${it.timestamp.toInstant()}")
         }
 
+
+        println("test 2....")
+        ftp.mlistDir("/").forEach {
+            println("file> ${it.name} ultima modifica>${it.timestamp.toInstant()}")
+        }
+        println("....end test 2....")
         //other method
         // Issue the FTP MDTM command (not supported by all servers) to retrieve the last modification
         // time of a file. The modification string should be in the ISO 3077 form "YYYYMMDDhhmmss(.xxx)?".
