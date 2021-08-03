@@ -55,6 +55,8 @@ fun main() {
         }
 
 
+
+
         println("test 2....")
         ftp.mlistDir("/").forEach {
             println("file> ${it.name} ultima modifica>${it.timestamp.toInstant()}")
@@ -73,9 +75,9 @@ fun main() {
         //upload
 //        ftp.appendFile("/pub/example/mime-explorer.png", File.createTempFile("mime-explorer","png").inputStream())
         //download
-        val file=File.createTempFile("mime-explorer",".png")
-        ftp.retrieveFile("/pub/example/mime-explorer.png", file.outputStream())
-        println("download result: file size-> ${file.totalSpace}")
+//        val file=File.createTempFile("mime-explorer",".png")
+//        ftp.retrieveFile("/pub/example/mime-explorer.png", file.outputStream())
+//        println("download result: file size-> ${file.totalSpace}")
 
         //other APi https://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/ftp/FTPClient.html
         ftp.logout()
@@ -86,3 +88,5 @@ fun main() {
         ftp.disconnect()
     }
 }
+
+
