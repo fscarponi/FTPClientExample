@@ -11,7 +11,8 @@ fun main() {
 
     val ftp = FTPClient()
 //    val server = "speedtest.tele2.net" //http://speedtest.tele2.net/
-    val server = "test.rebex.net" //http://speedtest.tele2.net/
+//    val server = "test.rebex.net" //http://speedtest.tele2.net/
+    val server = "192.168.1.19" //http://speedtest.tele2.net/
 
     //config does not work well!need learn how does it works!
 //    val config = FTPClientConfig()
@@ -21,7 +22,11 @@ fun main() {
 
     runCatching {
         ftp.connect(server)
-        if(ftp.login("demo","password")){
+
+//        if(ftp.login("demo","password")){
+//            println("login successful")
+//        }
+        if(ftp.login("ftpuser","ftppassword")){
             println("login successful")
         }
         println("Connected to $server.")
@@ -33,14 +38,31 @@ fun main() {
 
     }.onSuccess {
         //file and dir lists
-        println("${ftp.listFiles("/pub/example").count()} files trovati")
-        println(ftp.listFiles("/pub/example").map { it.name }.toList())
-        println(ftp.listDirectories("/pub/").map { it.name }.toList())
+//        println("${ftp.listFiles("/pub/example").count()} files trovati")
+        println("${ftp.listFiles("/").count()} files trovati")
+//        println(ftp.listFiles("/pub/example").map { it.name }.toList())
+        println(ftp.listFiles("/").map { it.name }.toList())
+//        println(ftp.listDirectories("/pub/").map { it.name }.toList())
+        println(ftp.listDirectories("/").map { it.name }.toList())
 
         //get last modification time
-        ftp.listFiles("/pub/example").forEach {
+        //Gets the file timestamp. This usually the last modification time.
+        //Returns:
+        //A Calendar instance representing the file timestamp.
+        //this method don't know seconds!<---CARE
+        ftp.listFiles("/docker-compose.yml").forEach {
             println("file> ${it.name} ultima modifica>${it.timestamp.toInstant()}")
         }
+
+        //other method
+        // Issue the FTP MDTM command (not supported by all servers) to retrieve the last modification
+        // time of a file. The modification string should be in the ISO 3077 form "YYYYMMDDhhmmss(.xxx)?".
+        // The timestamp represented should also be in GMT, but not all FTP servers honor this.
+//        println("/pub/example/mime-explorer.png  modification time")
+        println("/docker-compose.yml  modification time")
+        print(ftp.getModificationTime("/docker-compose.yml"))
+
+
 
         //upload
 //        ftp.appendFile("/pub/example/mime-explorer.png", File.createTempFile("mime-explorer","png").inputStream())
