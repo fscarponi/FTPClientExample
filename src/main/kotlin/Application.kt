@@ -37,6 +37,11 @@ fun main() {
         println(ftp.listFiles("/pub/example").map { it.name }.toList())
         println(ftp.listDirectories("/pub/").map { it.name }.toList())
 
+        //get last modification time
+        ftp.listFiles("/pub/example").forEach {
+            println("file> ${it.name} ultima modifica>${it.timestamp.toInstant()}")
+        }
+
         //upload
 //        ftp.appendFile("/pub/example/mime-explorer.png", File.createTempFile("mime-explorer","png").inputStream())
         //download
