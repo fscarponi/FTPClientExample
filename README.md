@@ -19,14 +19,17 @@ install server ftp
 
 `sudo apt update && sudo apt install vsftpd
 `
+
 check status
 
 `sudo service vsftpd status
 `
+
 create an ftp user and password (follow steps)
 
 `sudo adduser ftpusername
 `
+
 more FTP configuration needed-> https://devanswers.co/install-ftp-server-vsftpd-ubuntu-20-04/
 
 
