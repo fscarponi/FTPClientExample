@@ -16,14 +16,17 @@ ftp.login("demo","password")`
 -I'm using a raspberry py 3b with ubuntu 20 local fossa
 
 install server ftp
-sudo apt update && sudo apt install vsftpd
 
+`sudo apt update && sudo apt install vsftpd
+`
 check status
-sudo service vsftpd status
 
-create an ftp user and password
-sudo adduser ftpusername
+`sudo service vsftpd status
+`
+create an ftp user and password (follow steps)
 
+`sudo adduser ftpusername
+`
 more configuration needed-> https://devanswers.co/install-ftp-server-vsftpd-ubuntu-20-04/
 
 
