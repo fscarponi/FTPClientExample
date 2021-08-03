@@ -27,7 +27,7 @@ create an ftp user and password (follow steps)
 
 `sudo adduser ftpusername
 `
-more configuration needed-> https://devanswers.co/install-ftp-server-vsftpd-ubuntu-20-04/
+more FTP configuration needed-> https://devanswers.co/install-ftp-server-vsftpd-ubuntu-20-04/
 
 
 
