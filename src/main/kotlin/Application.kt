@@ -3,6 +3,8 @@ import org.apache.commons.net.ftp.FTPClientConfig
 import org.apache.commons.net.ftp.FTPConnectionClosedException
 import org.apache.commons.net.ftp.FTPReply
 import java.io.File
+import java.text.SimpleDateFormat
+import java.time.Instant
 
 
 //https://stackoverflow.com/questions/7968703/is-there-a-public-ftp-server-to-test-upload-and-download
@@ -68,7 +70,11 @@ fun main() {
         // The timestamp represented should also be in GMT, but not all FTP servers honor this.
 //        println("/pub/example/mime-explorer.png  modification time")
         println("/docker-compose.yml  modification time")
-        print(ftp.getModificationTime("/docker-compose.yml"))
+        println(ftp.getModificationTime("/docker-compose.yml"))
+
+        println(ftp.getLastModifiedAsInstant("/docker-compose.yml"))
+
+        synchronizeDir( "C:\\Users\\fscar\\AppData\\Local\\Temp\\FTPClientExample\\data","/",ftp)
 
 
 
@@ -90,3 +96,53 @@ fun main() {
 }
 
 
+
+enum class FtpFileSyncStrategy {
+    UPLOAD_LOCALE, DOWNLOAD_REMOTE, EQUALS
+}
+
+fun synchronizeDir(localDir: String, remoteDir: String,ftp: FTPClient) {
+
+//    val remoteLogPath by instance("REMOTE_LOG_PATH")
+//    val localLogPath by instance("LOCAL_LOG_PATH")
+    val localDirFiles = File(localDir).listFiles()
+    ftp.listFiles(remoteDir).forEach { ftpFile ->
+        if (ftpFile.isFile) {
+            val localFile = localDirFiles?.firstOrNull { it.name == ftpFile.name }
+            val remoteFilePath = "$remoteDir/${ftpFile.name}"
+            when (whatFileToSync(
+                localFile,
+                ftp.getLastModifiedAsInstant(pathName = remoteFilePath)
+            )) {
+                FtpFileSyncStrategy.UPLOAD_LOCALE -> {
+                    println("remote ${ftpFile.name} need to be updated")
+                    ftp.appendFile(remoteFilePath, localFile!!.inputStream())
+                }
+                FtpFileSyncStrategy.DOWNLOAD_REMOTE -> {
+                    println("local ${ftpFile.name} need to be updated")
+                    val localOutFile =
+                        localFile ?: File(localDir + File.separator + ftpFile.name).apply { createNewFile() }
+                    ftp.retrieveFile(remoteFilePath, localOutFile.outputStream())
+                }
+                FtpFileSyncStrategy.EQUALS -> println("remote ${ftpFile.name} has the same lastModified value of local file")
+            }
+        }else {
+            println("remote ${ftpFile.name} is not a File! SKIPPED")
+        }
+    }
+
+}
+
+fun FTPClient.getLastModifiedAsInstant(pathName: String): Instant =
+    SimpleDateFormat("yyyyMMddHHmmss").parse(this.getModificationTime(pathName)).toInstant()
+
+fun whatFileToSync(localFile: File?, remoteFileLastModified: Instant): FtpFileSyncStrategy =
+    localFile?.let {
+        val localLastModified = it.lastModified()
+        val remoteLastModified = remoteFileLastModified.toEpochMilli()
+        when {
+            (localLastModified - remoteLastModified) > 0 -> FtpFileSyncStrategy.UPLOAD_LOCALE
+            (localLastModified - remoteLastModified) < 0 -> FtpFileSyncStrategy.DOWNLOAD_REMOTE
+            else -> FtpFileSyncStrategy.EQUALS
+        }
+    } ?: FtpFileSyncStrategy.DOWNLOAD_REMOTE
