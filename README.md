@@ -25,17 +25,21 @@ check status
 `sudo service vsftpd status
 `
 
-create an ftp user and password (follow steps)
+(not necessary) create an ftp user and password (follow steps)
 
 `sudo adduser ftpusername
 `
+
+(NECESSARY) enable any kind of write from ftp :) (it tooks 2 days of work to find this setting! fool!)
+edit file etc/vsftpd.conf and uncomment line #writeEnabled=TRUE
+
+restart machine!
 
 more FTP configuration needed-> https://devanswers.co/install-ftp-server-vsftpd-ubuntu-20-04/
 
 
 
 ### WARNING
--grant all ftp permission to user
 
 -apache common lib provides 2 ways for check last file modification:
 
