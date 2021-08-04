@@ -28,7 +28,8 @@ fun main() {
 //        if(ftp.login("demo","password")){
 //            println("login successful")
 //        }
-        if (ftp.login("ftpuser", "ftppassword")) {
+        val password=System.getenv("RASPBERRY_PASSWORD")
+        if (ftp.login("ubuntu", password)) {
             println("login successful")
         }
         println("Connected to $server.")
@@ -52,7 +53,7 @@ fun main() {
         //Returns:
         //A Calendar instance representing the file timestamp.
         //this method don't know seconds!<---CARE
-        ftp.listFiles("/docker-compose.yml").forEach {
+        ftp.listFiles("/home/ubuntu/docker-compose.yml").forEach {
             println("file> ${it.name} ultima modifica>${it.timestamp.toInstant()}")
         }
 
@@ -70,11 +71,20 @@ fun main() {
         // The timestamp represented should also be in GMT, but not all FTP servers honor this.
 //        println("/pub/example/mime-explorer.png  modification time")
         println("/docker-compose.yml  modification time")
-        println(ftp.getModificationTime("/docker-compose.yml"))
+        println(ftp.getModificationTime("/home/ubuntu/docker-compose.yml"))
 
-        println(ftp.getLastModifiedAsInstant("/docker-compose.yml"))
-
-        synchronizeDir("C:\\Users\\fscar\\AppData\\Local\\Temp\\FTPClientExample\\data", "/", ftp)
+        println(ftp.getLastModifiedAsInstant("/home/ubuntu/docker-compose.yml"))
+        var totalchanges=0
+        repeat(30){
+            println("-----START ATTEMPT $it--------")
+            synchronizeDir("C:\\Users\\fscar\\AppData\\Local\\Temp\\FTPClientExample\\data", "/home/ubuntu/", ftp).apply {
+                println("file changed this attempt: $this")
+                totalchanges+=this
+            }
+            println("-----END ATTEMPT $it--------")
+            Thread.sleep(10000)
+        }
+        println("Total Changes of all attempts: $totalchanges")
 
         //upload
 //        ftp.appendFile("/pub/example/mime-explorer.png", File.createTempFile("mime-explorer","png").inputStream())
@@ -98,8 +108,8 @@ enum class FtpFileSyncStrategy {
     UPLOAD_LOCALE, DOWNLOAD_REMOTE, EQUALS
 }
 
-fun synchronizeDir(localDir: String, remoteDir: String, ftp: FTPClient) {
-
+fun synchronizeDir(localDir: String, remoteDir: String, ftp: FTPClient):Int {
+    var filesUpdated=0
 //    val remoteLogPath by instance("REMOTE_LOG_PATH")
 //    val localLogPath by instance("LOCAL_LOG_PATH")
     val localDirFiles = File(localDir).listFiles()
@@ -109,18 +119,21 @@ fun synchronizeDir(localDir: String, remoteDir: String, ftp: FTPClient) {
             val remoteFilePath = "$remoteDir/${ftpFile.name}"
             when (whatFileToSync(
                 localFile,
-                //ftp.getLastModifiedAsInstant(pathName = remoteFilePath)
-                ftpFile.timestamp.toInstant()
+                ftp.getLastModifiedAsInstant(pathName = remoteFilePath)
+                //ftpFile.timestamp.toInstant() this give not seconds information
             )) {
                 FtpFileSyncStrategy.UPLOAD_LOCALE -> {
                     println("remote ${ftpFile.name} need to be updated")
+                    ftp.deleteFile(remoteFilePath)
                     println("result of upload="+ftp.appendFile(remoteFilePath, localFile!!.inputStream()))
+                    filesUpdated++
                 }
                 FtpFileSyncStrategy.DOWNLOAD_REMOTE -> {
                     println("local ${ftpFile.name} need to be updated")
-                    val localOutFile =
-                        localFile ?: File(localDir + File.separator + ftpFile.name).apply { createNewFile() }
+                    if (localFile != null && localFile.exists() && localFile.isFile)  localFile.delete()
+                    val localOutFile = File(localDir + File.separator + ftpFile.name).apply { createNewFile() }
                     ftp.retrieveFile(remoteFilePath, localOutFile.outputStream())
+                    filesUpdated++
                 }
                 FtpFileSyncStrategy.EQUALS -> println("remote ${ftpFile.name} has the same lastModified value of local file")
             }
@@ -128,20 +141,22 @@ fun synchronizeDir(localDir: String, remoteDir: String, ftp: FTPClient) {
             println("remote ${ftpFile.name} is not a File! SKIPPED")
         }
     }
-
+    return filesUpdated
 }
 
 fun FTPClient.getLastModifiedAsInstant(pathName: String): Instant =
     SimpleDateFormat("yyyyMMddHHmmss").parse(this.getModificationTime(pathName)).toInstant()
 
-fun whatFileToSync(localFile: File?, remoteFileLastModified: Instant): FtpFileSyncStrategy =
+fun whatFileToSync(localFile: File?, remoteFileLastModified: Instant, millisecondErrorAdmitted: Long=5000): FtpFileSyncStrategy =
     localFile?.let {
         val localLastModified = it.lastModified()
         val remoteLastModified = remoteFileLastModified.toEpochMilli()
-        println("last modified> \nLocal:$localLastModified  \nRemote:$remoteLastModified")
+//        println("last modified> \nLocal:$localLastModified  \nRemote:$remoteLastModified")
+//        println("last modified> \nLocal:${Instant.ofEpochMilli(localLastModified)}  \nRemote:${remoteFileLastModified}")
+//        println("delta time> ${(localLastModified - remoteLastModified)} millis")
         when {
-            (localLastModified - remoteLastModified) > 0 -> FtpFileSyncStrategy.UPLOAD_LOCALE
-            (localLastModified - remoteLastModified) < 0 -> FtpFileSyncStrategy.DOWNLOAD_REMOTE
+            (localLastModified - remoteLastModified) > millisecondErrorAdmitted -> FtpFileSyncStrategy.UPLOAD_LOCALE
+            (localLastModified - remoteLastModified) < -millisecondErrorAdmitted -> FtpFileSyncStrategy.DOWNLOAD_REMOTE
             else -> FtpFileSyncStrategy.EQUALS
         }
     } ?: FtpFileSyncStrategy.DOWNLOAD_REMOTE
