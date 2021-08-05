@@ -37,6 +37,7 @@ restart service or machine!
 
 (NECESSARY) set the same time zone for server and client (unluckily ftp server give us back time as long with not zoneId infos...)
 
+
 more FTP configuration needed-> https://devanswers.co/install-ftp-server-vsftpd-ubuntu-20-04/
 
 

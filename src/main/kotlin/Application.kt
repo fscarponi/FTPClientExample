@@ -124,7 +124,8 @@ fun synchronizeDir(localDir: String, remoteDir: String, ftp: FTPClient):Int {
             )) {
                 FtpFileSyncStrategy.UPLOAD_LOCALE -> {
                     println("remote ${ftpFile.name} need to be updated")
-                    ftp.deleteFile(remoteFilePath)
+                    ftp.deleteFile(remoteFilePath)//care append a file without delete the old will cause that file will
+                    // be appended at the old file and not replaced..
                     println("result of upload="+ftp.appendFile(remoteFilePath, localFile!!.inputStream()))
                     filesUpdated++
                 }
