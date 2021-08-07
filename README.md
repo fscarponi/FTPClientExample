@@ -48,19 +48,19 @@ more FTP configuration needed-> https://devanswers.co/install-ftp-server-vsftpd-
 -apache common lib provides 2 ways for check last file modification:
 
     
-    #### FTPFile.timestamp
-    Gets the file timestamp. This usually the last modification time.
-    Returns:A Calendar instance
-    representing the file timestamp.
+   #### FTPFile.timestamp
+   Gets the file timestamp. This usually the last modification time.
+   Returns:A Calendar instance
+   representing the file timestamp.
     
-    **this method don't return seconds!<---CARE**
-    so if you are polling this check more than 1 time per minute.. this is not accurate!!
-    `es.2021-03-13T21:43:00Z`
+   **this method don't return seconds!<---CARE**
+   so if you are polling this check more than 1 time per minute.. this is not accurate!!
+   `es.2021-03-13T21:43:00Z`
     
-    #### ftpConnection.getModificationTime("/file or dir")
-    Returns:A String that PROBABLY is ISO 3077 form YYYYMMDDhhmmss
-    Issue the FTP MDTM command **_(not supported by all servers)_** to retrieve the last modification
-    time of a file. The modification string should be in the **ISO 3077 form "YYYYMMDDhhmmss(.xxx)?**".
-    The timestamp represented should also be in GMT, **but not all FTP servers honor this**.
+   #### ftpConnection.getModificationTime("/file or dir")
+   Returns:A String that PROBABLY is ISO 3077 form YYYYMMDDhhmmss
+   Issue the FTP MDTM command **_(not supported by all servers)_** to retrieve the last modification
+   time of a file. The modification string should be in the **ISO 3077 form "YYYYMMDDhhmmss(.xxx)?**".
+   The timestamp represented should also be in GMT, **but not all FTP servers honor this**.
     
     `es.20210313224334`
