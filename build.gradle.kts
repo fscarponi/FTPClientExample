@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.5.10"
+    kotlin("jvm") version "1.6.21"
     application
 }
 
@@ -17,7 +17,7 @@ repositories {
 dependencies {
     testImplementation(kotlin("test"))
 
-    implementation("commons-net:commons-net:3.8.0")
+    implementation("commons-net:commons-net:3.9.0")
 
 }
 
